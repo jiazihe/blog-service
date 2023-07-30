@@ -1,7 +1,7 @@
 // 处理博客相关的路由
 const {SuccessModel, ErrorModel} = require('../model/responseModel');
 const {getList, getDetail, createNewBlog, updateBlog, deleteBlog} = require('../controllers/blog');
-
+const { execSQL } = require('../db/mysql');
 
 const handleBlogRouter = (req, res) => {
     // 定义处理路由的逻辑
@@ -23,19 +23,23 @@ const handleBlogRouter = (req, res) => {
 
     // 获取博客详情
     if (method === 'GET' && req.path === '/api/blog/detail') {
-        
-        const detailData = getDetail(id);
-
-        return new SuccessModel(detailData);
+        const detailDataPromise = getDetail(id);
+        return detailDataPromise.then(detailData => {
+            return new SuccessModel(detailData);
+        }
+        );
     }
 
     // 新建一篇博客
     if (method === 'POST' && req.path === '/api/blog/new') {
-        
-        const newBlogData = createNewBlog(req.body);
-        
-        return new SuccessModel(newBlogData);
+        const author = 'zhangsan'; // 假数据，待开发登录时再改成真实数据
+        req.body.author = author;
+        const newBlogDataPromise = createNewBlog(blogData);
+        return newBlogDataPromise.then(newBlogData => {
+            return new SuccessModel(newBlogData);
+        })
     }
+
     // 更新一篇博客
     if (method === 'POST' && req.path === '/api/blog/update') {
         console.log('req.body', req.body);

@@ -2,57 +2,46 @@
 const {execSQL} = require('../db/mysql');
 const getList = (author, keyword) => {
     // 从数据库里拿数据
-    let sql = `select * from blogs where 1=1 `;
-
-    if (author) {
-        sql += `and author='${author}' `;
+    let sql = `select * from blogs where 1=1 `; // 1=1 是为了防止author和keyword都没有值，导致sql语句报错
+    if (author) {   
+        sql += `and author='${author}' `;   
     }
 
-    if (keyword) {
+    if (keyword) {  
         sql += `and title like '%${keyword}%'`;
     }
 
     // promise方式
-    return execSQL(sql);
-
-    // 先返回假数据（格式是正确的）
-    // return [
-    //     {
-    //         id: 1,
-    //         title: '标题1',
-    //         content: '内容1',
-    //         author: 'zhangsan',
-    //         createdAt: 1610555518935
-    //     },
-    //     {
-    //         id: 2,
-    //         title: '标题2',
-    //         content: '内容2',
-    //         author: 'lisi',
-    //         createdAt: 1610555518944
-    //     },
-    // ]
+    return execSQL(sql);    
 }
 
 // 获取博客详情数据
 const getDetail = (id) => {
-    // 先返回假数据
-    return {
-        id: 5,
-        title: '标题1',
-        content: '内容1',
-        author: 'zhangsan',
-        createdAt: 1610555518935
-    };
+    const sql = `select * from blogs where id='${id}'`; // 注意这里的id要加单引号，因为id是字符串
+    return execSQL(sql).then(rows => {  // 这里的rows是一个数组，只有一个元素，所以取rows[0]
+        console.log('rows', rows);  
+        return rows[0]; 
+    });
 }
 
 // 创建一篇新的博客
 const createNewBlog = (blogData = {}) => {
     // blogData 是一个博客对象，包含 title content 属性
-    console.log('blogData', blogData);
-    return {
-        id: 3 // 表示新建博客，插入到数据表里的id
-    }
+    const title = blogData.title;
+    const content = blogData.content;
+    const author = blogData.author;
+    const createdAt = Date.now();
+
+    const sql = `
+        insert into blogs (title, content, author, createdAt) values ('${title}', '${content}', '${author}', ${createdAt});
+    `;
+
+    return execSQL(sql).then(insertedResult => {
+        console.log('insertedResult', insertedResult);
+        return{
+            id: insertedResult.insertId
+        }
+    });   
 }
 
 // 此处给bigData一个默认值（空对象），防止没有传入blogData时报错
