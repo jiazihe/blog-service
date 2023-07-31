@@ -42,28 +42,27 @@ const handleBlogRouter = (req, res) => {
 
     // 更新一篇博客
     if (method === 'POST' && req.path === '/api/blog/update') {
-        console.log('req.body', req.body);
-        const updatedBlogData = updateBlog(id, blogData);
-
-        if (updatedBlogData) {
-            return new SuccessModel('更新博客成功');
-        } else {
-            return new ErrorModel('更新博客失败');
-        
-    }
+        const updatedBlogDataPromise = updateBlog(id, blogData);
+        return updatedBlogDataPromise.then(updatedBlogData => {
+            if (updatedBlogData) {
+                return new SuccessModel('更新博客成功');
+            } else {
+                return new ErrorModel('更新博客失败');
+            }
+        });        
     }
 
     // 删除一篇博客
     if (method === 'POST' && req.path === '/api/blog/delete') {
-        const deleteBlogData = deleteBlog(id);
-
-        if (deleteBlogData) {
-            return new SuccessModel('删除博客成功');
-        } else {
-            return new ErrorModel('删除博客失败');
-        }    
-    }
-
-}
+        const author = 'zhangsan'; // 假数据，待开发登录时再改成真实数据
+        const deleteBlogDataPromise = deleteBlog(id, author);
+        return deleteBlogDataPromise.then(deleteBlogData => {
+            if (deleteBlogData) {
+                return new SuccessModel('删除博客成功');
+            } else {
+                return new ErrorModel('删除博客失败');
+            }
+        });
+    }};
 
 module.exports = handleBlogRouter;
